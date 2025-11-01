@@ -1,0 +1,4 @@
+white_rum 0.08 ananas_juice 0.32 coconut_milk 0.10
+white_rum 0.25 coke 0.25
+white_rum 0.42 coke 0.08
+white_rum 0.08 coke 0.42
