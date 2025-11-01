@@ -1,0 +1,17 @@
+unicum SPIRIT 40.00 4.25 0.80 5.00 4.32
+jäger SPIRIT 35.00 2.10 2.75 0.20 4.32
+vodka SPIRIT 40.00 0.10 0.20 2.14 1.00
+white_rum SPIRIT 37.50 0.15 2.10 3.43 1.52
+whiskey SPIRIT 42.00 3.40 1.10 0.00 2.00
+gin SPIRIT 40.00 2.85 0.50  3.21 1.52
+dio_palinka SPIRIT 42.00 0.3 3.67 4.67 5.00
+argus_strong BEER 7.20 4.00 3.50 0.00 5.00
+tonic MIXER 0.00 1.90 1.60 3.00 1.00
+kong_strong MIXER 0.00 0.00 4.21 4.99 5.00
+soda MIXER 0.00 0.00 0.10 0.50 0.50
+orange_juice MIXER 0.00 0.10 3.80 3.65 1.00
+strawberry_syrup MIXER 0.00 0.05 4.90 4.21 3.00
+milk MIXER 0.00 0.00 3.00 5.00 4.35
+coke MIXER 0.00 0.20 4.80 3.36 1.00
+ananas_juice MIXER 0.00 0.10 4.10 4.46 2.56
+coconut_milk MIXER 0.00 0.00 3.70 4.00 3.98
