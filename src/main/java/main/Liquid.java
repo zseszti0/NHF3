@@ -1,6 +1,8 @@
 package main;
 
-public class Liquid {
+import java.io.Serializable;
+
+public class Liquid implements Serializable {
     private final String name;
     private final String type; // "alcohol" or "mixer"
     private final double alcohol;

@@ -13,6 +13,9 @@ import javafx.geometry.Pos;
 import javax.swing.text.Position;
 import javafx.scene.control.Button;
 
+import java.io.IOException;
+import java.util.Objects;
+
 
 public class MainMenuScene extends BaseScene{
     public MainMenuScene() {
@@ -20,12 +23,12 @@ public class MainMenuScene extends BaseScene{
     }
 
     @Override
-    protected Parent createContainer() {
+    protected StackPane createContainer() {
         //root container of all objects
         StackPane root = new StackPane();
 
         //background
-        Image bg = new Image(getClass().getResource("/assets/backgrounds/mainMenu.png").toExternalForm());
+        Image bg = new Image(Objects.requireNonNull(getClass().getResource("/assets/backgrounds/mainMenu.png")).toExternalForm());
         ImageView bgView = new ImageView(bg);
         bgView.setFitWidth(BaseScene.WIDTH);
         bgView.setFitHeight(BaseScene.HEIGHT);

@@ -1,7 +1,8 @@
 package graphics;
 
-import helperClasses.Recipes;
-import helperClasses.RecipesFileHandler;
+import main.Mix;
+import main.Recipes;
+import helperClasses.RecipeSerializer;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.image.Image;
@@ -9,12 +10,12 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
-import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
 import main.Liquid;
 import javafx.scene.control.Button;
 
 
+import java.io.IOException;
 import java.util.*;
 
 public class RecipesPane {
@@ -31,7 +32,6 @@ public class RecipesPane {
 
 
     private void changeDisplayedRecipe(){
-
         // Column headers
         Text header1 = new Text("Liquid");
         Text header2 = new Text("Amount");
@@ -42,17 +42,27 @@ public class RecipesPane {
         recipeTextCont.add(header1, 0, 0);
         recipeTextCont.add(header2, 1, 0);
 
-        // Example data
-        int row = 1;
-        for (Hashtable<Liquid, Double> ingredient : recipes.recipeKeys.get(currentRecipe)) {
-            for(Liquid entry : ingredient.keySet()) {
+        // Load the new recepies
+        // Remove all nodes except those in row 0
+        if(!recipes.mixes.isEmpty()) {
+            recipeTextCont.getChildren().removeIf(node -> GridPane.getRowIndex(node) != null && GridPane.getRowIndex(node) > 0);
+
+            int row = 1;
+            Mix currentMix = recipes.mixes.get(currentRecipe);
+            for (Liquid entry : currentMix.getLiquids()) {
                 Text name = new Text(entry.getName());
-                Text amount = new Text(String.format("%.2f ml", ingredient.get(entry) * 1000)); // assuming 0.5L total
+                Text amount = new Text(String.format("%.0f ml", currentMix.get(entry) * 1000)); // 0.5L total
 
                 recipeTextCont.add(name, 0, row);
                 recipeTextCont.add(amount, 1, row);
                 row++;
             }
+
+            Text ratingStars = new Text(recipes.mixRecipes.get(recipes.mixes.get(currentRecipe)).getKey().toString() + "★");
+            ratingStars.setStyle("-fx-font-weight: bold; -fx-font-size: 16;");
+
+            recipeTextCont.add(ratingStars, 0, row);
+            recipeTextCont.setAlignment(Pos.CENTER);
         }
     }
     private void setupVisuals() {
@@ -62,11 +72,11 @@ public class RecipesPane {
         StackPane recipesRoot = new StackPane();
         recipesRoot.setPrefSize(WIDTH, HEIGHT);
         recipesRoot.setLayoutX(100);
-        recipesRoot.setLayoutY(150);
+        recipesRoot.setLayoutY(500);
 
         
         //bg
-        Image bg = new Image(getClass().getResource("/assets/ui/recipesBookBg.png").toExternalForm());
+        Image bg = new Image(Objects.requireNonNull(getClass().getResource("/assets/ui/recipesBookBg.png")).toExternalForm());
         ImageView bgView = new ImageView(bg);
         bgView.setFitWidth(WIDTH);
         bgView.setFitHeight(HEIGHT);
@@ -74,13 +84,7 @@ public class RecipesPane {
         //close button
         Button closeButton = new Button("X");
         closeButton.setOnAction(e -> parentRoot.getChildren().remove(recipesRootCont));
-
-        //close button pane cont
-        Pane closeButtonContPane = new Pane();
-        closeButtonContPane.setPrefSize(WIDTH, HEIGHT);
-        closeButtonContPane.getChildren().add(closeButton);
-        closeButton.setLayoutX((double) (BaseScene.WIDTH - WIDTH) /2 + WIDTH - 30);
-        closeButton.setLayoutY((double) (BaseScene.HEIGHT - HEIGHT) /2 + 10);
+        
 
 
         //setup recipe text system
@@ -93,43 +97,77 @@ public class RecipesPane {
         Pane recipeGridPane = new Pane();
         recipeGridPane.setPrefSize(WIDTH, HEIGHT);
         recipeGridPane.getChildren().add(closeButton);
-        recipeTextCont.setLayoutX((double) (BaseScene.WIDTH - WIDTH) /2 +  30);
-        recipeTextCont.setLayoutY((double) (BaseScene.HEIGHT - HEIGHT) /2 + 50);
+        recipeTextCont.setLayoutX((double) (BaseScene.WIDTH - WIDTH) /2 +  80);
+        recipeTextCont.setLayoutY((double) (BaseScene.HEIGHT - HEIGHT) /2 + 200);
 
         recipeGridPane.getChildren().add(recipeTextCont);
         
         
         //recipe change button
-        Button recipeChange = new Button(">");
-        recipeChange.setOnAction(e -> {
-            if(currentRecipe != recipes.recipeKeys.size()-1)
+
+        //forwards button
+        Button recipeChangeRight = new Button(">");
+        Button recipeChangeLeft = new Button("<");
+        recipeChangeRight.setOnAction(e -> {
+            if(currentRecipe != recipes.mixes.size()-1)
                 currentRecipe++;
             changeDisplayedRecipe();
+
+            if(currentRecipe == recipes.mixes.size()-1) {
+                recipeChangeRight.setDisable(true);
+            }
+            else if(currentRecipe - 1 > 0) {
+                recipeChangeLeft.setDisable(false);
+            }
         });
+        //backwards button
+        recipeChangeLeft.setOnAction(e -> {
+            if(currentRecipe != 0)
+                currentRecipe--;
+            changeDisplayedRecipe();
+
+            if(currentRecipe == 0) {
+                recipeChangeLeft.setDisable(true);
+            }
+            else if(currentRecipe+1 < recipes.mixes.size()-1) {
+                recipeChangeRight.setDisable(false);
+            }
+        });
+        recipeChangeLeft.setDisable(true);
 
 
 
         //recipe change button pane cont
-        Pane recipeChangeButtonPane = new Pane();
-        recipeChangeButtonPane.setPrefSize(WIDTH, HEIGHT);
-        recipeChangeButtonPane.getChildren().add(recipeChange);
-        recipeChange.setLayoutX((double) (BaseScene.WIDTH - WIDTH) /2 + WIDTH - 30);
-        recipeChange.setLayoutY((double) (BaseScene.HEIGHT - HEIGHT) /2 + 300);
+        Pane buttonPane = new Pane();
+        buttonPane.setPrefSize(WIDTH, HEIGHT);
+
+        buttonPane.getChildren().add(recipeChangeRight);
+        recipeChangeRight.setLayoutX((double) (BaseScene.WIDTH - WIDTH) /2 + WIDTH - 30);
+        recipeChangeRight.setLayoutY((double) (BaseScene.HEIGHT - HEIGHT) /2 + 300);
+
+        buttonPane.getChildren().add(recipeChangeLeft);
+        recipeChangeLeft.setLayoutX((double) (BaseScene.WIDTH - WIDTH) /2 + 30);
+        recipeChangeLeft.setLayoutY((double) (BaseScene.HEIGHT - HEIGHT) /2 + 300);
+        
+        //add the close button to the same pane, to avoid unclickable buttons
+        buttonPane.getChildren().add(closeButton);
+        closeButton.setLayoutX((double) (BaseScene.WIDTH - WIDTH) /2 + WIDTH - 30);
+        closeButton.setLayoutY((double) (BaseScene.HEIGHT - HEIGHT) /2 + 10);
 
 
 
 
         //add everything to recipesRootCont
-        recipesRoot.getChildren().addAll(bgView, closeButtonContPane, recipeGridPane, recipeChangeButtonPane);
+        recipesRoot.getChildren().addAll(bgView, recipeGridPane, buttonPane);
 
         //add the layers to the pain
         recipesRootCont.getChildren().addAll(recipesRoot);
     }
-    public RecipesPane(StackPane parentRoot) {
+    public RecipesPane(StackPane parentRoot){
         this.parentRoot = parentRoot;
         this.recipesRootCont = new StackPane();
 
-        recipes = RecipesFileHandler.loadRecipes();
+        recipes = RecipeSerializer.getRecipesFromFile();
 
         //setup visuals
         setupVisuals();

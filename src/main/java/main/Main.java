@@ -14,12 +14,19 @@ public class Main extends Application {
     public void start(Stage stage) {
         //make the main stage (window)
         SceneManager.setStage(stage);
+        stage.setResizable(false);
+
+
+
 
         //make the menus and add them to the SM
         MainMenuScene mainMenu = new MainMenuScene();
         SceneManager.addScene("main menu", mainMenu);
+
+        //mix
         MixScene mix = new MixScene();
         SceneManager.addScene("mix", mix);
+
 
         //load the main menu as default
         SceneManager.loadScene("main menu");
