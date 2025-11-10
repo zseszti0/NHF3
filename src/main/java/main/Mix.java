@@ -1,6 +1,7 @@
 package main;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
 
@@ -14,9 +15,6 @@ public class Mix implements Serializable {
         }
         this.liquids = liquids;
     }
-    public Hashtable<Liquid,Double> getMix() {
-        return mix;
-    }
     public List<Liquid> getLiquids() {
         return liquids;
     }
@@ -24,6 +22,14 @@ public class Mix implements Serializable {
     public double get(Liquid l) {
         return mix.get(l);
     }
+    public void reset(){
+        mix = new Hashtable<>();
+        liquids = new ArrayList<>();
+    }
+    public void put(Liquid l,double d){
+        mix.put(l,d);
+    }
+
 
     @Override
     public String toString() {
@@ -33,4 +39,5 @@ public class Mix implements Serializable {
         }
         return mixString;
     }
+
 }
