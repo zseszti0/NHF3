@@ -1,6 +1,7 @@
 package helperClasses;
 
 import main.Liquid;
+import main.Mix;
 
 import java.util.ArrayList;
 import java.util.Hashtable;
@@ -10,10 +11,10 @@ import static java.lang.Math.abs;
 import static java.lang.Math.clamp;
 
 public class RateDrink {
-    private final List<Hashtable<Liquid,Double>> mix;
+    private final Hashtable<Liquid,Double> mix;
 
     private double rating = 0;
-    private int reaction;
+    private String reaction;
 
     private double taste = 0;
     private double funnes = 0;
@@ -196,17 +197,17 @@ public class RateDrink {
         double totalVolume = 0;
         double alcohol = 0, bitter = 0, sweet = 0, fun = 0, creative = 0;
 
-        for (Hashtable<Liquid, Double> entry : mix) {
-            for (Liquid l : entry.keySet()) {
-                double v = entry.get(l);
-                totalVolume += v;
-                alcohol += (l.getAlcohol()/100) * v;
-                bitter += l.getBitterness() * v;
-                sweet += l.getSweetness() * v;
-                fun += l.getFunness() * v;
-                creative += l.getCreativity() * v;
-            }
+
+        for (Liquid l : mix.keySet()) {
+            double v = mix.get(l);
+            totalVolume += v;
+            alcohol += (l.getAlcohol()/100) * v;
+            bitter += l.getBitterness() * v;
+            sweet += l.getSweetness() * v;
+            fun += l.getFunness() * v;
+            creative += l.getCreativity() * v;
         }
+
         if (totalVolume == 0) return; // avoid division by zero
 
         double avgSweet = sweet / totalVolume;
@@ -216,15 +217,15 @@ public class RateDrink {
         int numIngredients = mix.size();
         int numMixers = 0;
         int numAlcohols = 0;
-        for (Hashtable<Liquid, Double> entry : mix) {
-            for (Liquid l : entry.keySet()) {
-                if (l.getType().equals("MIXER")) {
-                    numMixers++;
-                } else{
-                    numAlcohols++;
-                }
+
+        for (Liquid l : mix.keySet()) {
+            if (l.getType().equals("MIXER")) {
+                numMixers++;
+            } else{
+                numAlcohols++;
             }
         }
+
 
 
 
@@ -272,35 +273,38 @@ public class RateDrink {
 
     private void generateReaction() {
         //3 positive reaction:
-        // 0=• Transcending to heaven
-        // 1=• *insert very drunk face*
-        // 2=• OK.
+        // 0=• transcending to heaven
+        // 1=• very_drunk
+        // 2=• OK
         //3 negative reaction:
-        // 3=• Not that great drink
-        // 4=• Ew, barf
-        // 5=• Taken by hell and burned in fire
+        // 3=• not_that_great_drink
+        // 4=• ew_barf
+        // 5=• taken_by_hell_and_burned_in_fire
         if(rating >= 4 || funnes > 4.8){
-            reaction = 0;
+            reaction = "transcending_to_heaven";
         }
-        else if(taste >= 3.5 || funnes >= 3.5 || creativity >= 3.5 || craziness >= 3.5){
-            reaction = 1;
+        else if((taste >= 3.5 || funnes >= 3.5 || creativity >= 3.5 || craziness >= 3.5) && taste > 2.5){
+            reaction = "very_tasty_drink";
         }
-        else if(taste < 2){
-            reaction = 4;
+        else if((taste < 2 && taste > 0.1)){
+            reaction = "ew_barf";
         }
-        else if ( creativity >= 2.5 || craziness >= 2.5) {
-            reaction = 2;
+        else if(craziness >= 3){
+            reaction = "taken_by_hell_and_burned_in_fire";
         }
-        else if(funnes <= 0.2 || creativity <= 0.2 || craziness <= 0.2){
-            reaction = 5;
+        else if ( creativity >= 2.5 || craziness >= 2.5 || taste > 3) {
+            reaction = "OK";
+        }
+        else if(funnes <= 1.2 || creativity <= 0.5 || craziness <= 1.2){
+            reaction = "taken_by_hell_and_burned_in_fire";
         }
         else{
-            reaction = 3;
+            reaction = "not_that_great_drink";
         }
     }
     
-    public RateDrink(List<Hashtable<Liquid,Double>> mix) {
-        this.mix = mix;
+    public RateDrink(Mix mix) {
+        this.mix = mix.getMix();
 
         //calculate the rating
         calculateMixStats();
@@ -309,7 +313,7 @@ public class RateDrink {
     }
 
     public double getRating() { return rating; }
-    public int getReaction() { return reaction; }
+    public String getReaction() { return reaction; }
     public List<Double> getAttributes(){
         ArrayList<Double> attributes = new ArrayList<>();
         attributes.add(taste);
@@ -322,10 +326,8 @@ public class RateDrink {
     @Override
     public String toString() {
         String mixString = "Mix: ";
-        for (Hashtable<Liquid, Double> entry : mix) {
-            for (Liquid l : entry.keySet()) {
-                mixString += l.getName() + " (" + entry.get(l) + "l), ";
-            }
+        for (Liquid l : mix.keySet()) {
+            mixString += l.getName() + " (" + mix.get(l) + "l), ";
         }
         return (mixString + "\n Rating: " + rating +
                 "\n Taste: " + taste + " Funnes: " + funnes +

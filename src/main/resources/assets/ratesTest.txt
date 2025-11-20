@@ -2,7 +2,8 @@ white_rum 0.08 ananas_juice 0.32 coconut_milk 0.10
 white_rum 0.25 coke 0.25
 white_rum 0.42 coke 0.08
 white_rum 0.08 coke 0.42
-white_rum 0.04 coke 0.46
+white_rum 0.041 coke 0.459
+white_rum 0.040 coke 0.460
 white_rum 0.04 tonic 0.092 orange_juice 0.092 strawberry_syrup 0.092 kong_strong 0.092 coconut_milk 0.092
 vodka 0.25 orange_juice 0.25
 vodka 0.08 orange_juice 0.32 strawberry_syrup 0.10

@@ -2,45 +2,56 @@ package main;
 
 import helperClasses.MixSerializer;
 import helperClasses.LiquidLoader;
+import helperClasses.RateDrink;
 import helperClasses.RecipeSerializer;
 import javafx.util.Pair;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Hashtable;
 import java.util.List;
 
 public class RateTestingMiniApp {
     public static void main(String[] args) throws IOException, ClassNotFoundException {
-        List<Liquid> drinks = LiquidLoader.loadDrinks("./src/main/resources/assets/liquids.txt");
-        List<Liquid> ls = new ArrayList<>();
-        ls.add(drinks.get(0));
-        ls.add(drinks.get(1));
-        ls.add(drinks.get(2));
 
-        List<Double> rates = new ArrayList<>();
-        rates.add(0.1);
-        rates.add(0.2);
-        rates.add(0.3);
+        List<Liquid> availableLiquids = LiquidLoader.loadDrinks("./src/main/resources/assets/liquids.txt");
 
-        List<Mix> test = new ArrayList<>();
-        for(int i = 0; i < 10; i++) {
-            test.add(new Mix(ls, rates));
+        String filename = "src/main/resources/assets/ratesTest.txt"; // replace with your file path
+        List<Mix> linesData = new ArrayList<>();
+
+        try (BufferedReader br = new BufferedReader(new FileReader(filename))) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                String[] tokens = line.trim().split("\\s+");
+                Mix table = new Mix();
+
+                for (int i = 0; i < tokens.length - 1; i += 2) {
+                    String key = tokens[i];
+                    double value = Double.parseDouble(tokens[i + 1]);
+
+                    Liquid toput = null;
+                    for(Liquid l : availableLiquids) {
+                        if(l.getName().equals(key)) {
+                            toput = l;
+                            break;
+                        }
+                    }
+
+                    table.put(toput, value);
+                }
+
+                linesData.add(table);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
         }
 
-        MixSerializer.saveMixesToFile(test, "./src/main/resources/assets/mixes.ser");
-
-
-        List<Mix> mixes = MixSerializer.getMixeFromFile("./src/main/resources/assets/mixes.ser");
-
-
-        Recipes recipes = new Recipes();
-        recipes.mixes = mixes;
-        for (Mix mix : mixes) {
-            recipes.mixRecipes.put(mix, new Pair<>(0.0, 0.0));
+        // Example: print all the hashtables
+        for (Mix table : linesData) {
+            RateDrink rater = new RateDrink(table);
+            System.out.println(rater);
         }
-        RecipeSerializer.saveRecipesToFile(recipes);
-
-        Recipes fromFile = RecipeSerializer.getRecipesFromFile();
-        System.out.println(recipes.toString());
     }
 }

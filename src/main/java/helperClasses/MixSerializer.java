@@ -7,7 +7,7 @@ import java.util.List;
 
 public class MixSerializer {
     
-    public static List<Mix> getMixeFromFile(String filePath) throws IOException, ClassNotFoundException {
+    public static List<Mix> getMixFromFile(String filePath) throws IOException, ClassNotFoundException {
         ObjectInputStream in = new ObjectInputStream(new FileInputStream(filePath));
         List<Mix> mixes = (List<Mix>) in.readObject();
         in.close();
