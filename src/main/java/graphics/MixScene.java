@@ -1,9 +1,6 @@
 package graphics;
 
-import helperClasses.LiquidLoader;
-import helperClasses.MixStage;
-import helperClasses.PourButtonLogic;
-import helperClasses.RateDrink;
+import helperClasses.*;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Parent;
@@ -253,6 +250,12 @@ public class MixScene extends BaseScene{
                 currentStage = POUR;
 
                 bartender.setState(rating.getReaction());
+
+                try {
+                    MixSerializer.saveMixToFile(currentMix, "src/main/resources/assets/recipes.ser");
+                } catch (IOException ex) {
+                    //thats fine.
+                }
             }
         });
 
