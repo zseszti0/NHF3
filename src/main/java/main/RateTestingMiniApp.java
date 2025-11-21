@@ -1,16 +1,12 @@
 package main;
 
-import helperClasses.MixSerializer;
 import helperClasses.LiquidLoader;
 import helperClasses.RateDrink;
-import helperClasses.RecipeSerializer;
-import javafx.util.Pair;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Hashtable;
 import java.util.List;
 
 public class RateTestingMiniApp {
