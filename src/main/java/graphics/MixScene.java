@@ -3,7 +3,6 @@ package graphics;
 import helperClasses.*;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
-import javafx.scene.Parent;
 import javafx.scene.control.Button;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -11,11 +10,9 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
-import javafx.scene.layout.VBox;
 import main.Liquid;
 import main.Mix;
 
-import javax.swing.*;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -252,9 +249,11 @@ public class MixScene extends BaseScene{
                 bartender.setState(rating.getReaction());
 
                 try {
-                    MixSerializer.saveMixToFile(currentMix, "src/main/resources/assets/recipes.ser");
+                    RecipeSerializer.saveMixToFile(currentMix, "src/main/resources/assets/recipes.ser");
                 } catch (IOException ex) {
                     //thats fine.
+                } catch (ClassNotFoundException ex) {
+
                 }
             }
         });

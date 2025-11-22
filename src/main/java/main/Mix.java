@@ -6,6 +6,9 @@ import java.util.Hashtable;
 import java.util.List;
 
 public class Mix implements Serializable {
+    @java.io.Serial
+    private static final long serialVersionUID = 1L;
+
     private Hashtable<Liquid,Double> mix = new Hashtable<>();
     private List<Liquid> liquids = new ArrayList<>();
 

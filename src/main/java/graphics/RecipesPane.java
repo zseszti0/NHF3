@@ -1,8 +1,7 @@
 package graphics;
 
 import main.Mix;
-import main.Recipes;
-import helperClasses.RecipeSerializer;
+import main.Recipe;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.image.Image;
@@ -15,7 +14,6 @@ import main.Liquid;
 import javafx.scene.control.Button;
 
 
-import java.io.IOException;
 import java.util.*;
 
 public class RecipesPane {
@@ -24,7 +22,7 @@ public class RecipesPane {
 
     private Pane recipesRootCont = new Pane();
     private StackPane parentRoot;
-    private Recipes recipes;
+    private Recipe recipes;
     private int currentRecipe = 0;
 
     private GridPane recipeTextCont = new GridPane();
