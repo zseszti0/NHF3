@@ -14,11 +14,19 @@ public class Recipe implements Serializable{
 
     @Override
     public String toString() {
+        //round rating to 0.25's
+        double ratingTemp = Math.round(rating * 4) / 4.0;
+
         String recipesString = "";
         recipesString += "Reaction: " + reaction + "\n";
         recipesString += mix.toString();
-        recipesString += "\nRating: " + rating;
+        recipesString += "\nRating: " + String.format("%.2f ",ratingTemp);
         return recipesString;
     }
 
+    public String ratingToString() {
+        double ratingTemp = Math.round(rating * 4) / 4.0;
+
+        return String.format("%.2f ★",ratingTemp);
+    }
 }

@@ -12,6 +12,7 @@ import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 import main.Liquid;
 import main.Mix;
+import main.Recipe;
 
 import java.io.File;
 import java.io.IOException;
@@ -54,6 +55,7 @@ public class MixScene extends BaseScene{
                 }
                 else {
                     root.getChildren().add(escapeMenuRootCont);
+                    AnimationPresets.EscapeMenuAppear(escapeMenuRootCont.getChildren().get(1));
                     isEscUp = true;
                 }
             }
@@ -248,8 +250,12 @@ public class MixScene extends BaseScene{
 
                 bartender.setState(rating.getReaction());
 
+                Recipe newRecipe = new Recipe();
+                newRecipe.mix = currentMix;
+                newRecipe.rating = rating.getRating();
+                newRecipe.reaction = rating.getReaction();
                 try {
-                    RecipeSerializer.saveMixToFile(currentMix, "src/main/resources/assets/recipes.ser");
+                    RecipeSerializer.saveRecipeToFile(newRecipe, "src/main/resources/assets/recipes.ser");
                 } catch (IOException ex) {
                     //thats fine.
                 } catch (ClassNotFoundException ex) {

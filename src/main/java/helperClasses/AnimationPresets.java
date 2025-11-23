@@ -25,4 +25,30 @@ public class AnimationPresets {
 
         anim.play();
     }
+
+    public static void EscapeMenuAppear(Node target){
+        Animator anim = new Animator(target);
+
+        //starts invisible, squashed down, with slightly smaller scaling, and 0.5 opacity
+
+        anim.addKeyFrame(Duration.millis(0),
+                new KeyValue(target.scaleXProperty(), 0.5),
+                new KeyValue(target.scaleYProperty(), 0),
+                new KeyValue(target.opacityProperty(), 0.5)
+        );
+        anim.addKeyFrame(Duration.millis(180),
+                new KeyValue(target.scaleXProperty(), 0.8),
+                new KeyValue(target.scaleYProperty(), 0.8)
+        );
+        anim.addKeyFrame(Duration.millis(230),
+                new KeyValue(target.scaleXProperty(), 1.1),
+                new KeyValue(target.scaleYProperty(), 1.1),
+                new KeyValue(target.opacityProperty(), 1)
+        );
+        anim.addKeyFrame(Duration.millis(300),
+                new KeyValue(target.scaleXProperty(), 1),
+                new KeyValue(target.scaleYProperty(), 1)
+        );
+        anim.play();
+    }
 }

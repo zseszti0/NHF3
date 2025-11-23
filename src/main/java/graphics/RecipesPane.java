@@ -1,5 +1,6 @@
 package graphics;
 
+import helperClasses.RecipeSerializer;
 import main.Mix;
 import main.Recipe;
 import javafx.geometry.Insets;
@@ -22,7 +23,7 @@ public class RecipesPane {
 
     private Pane recipesRootCont = new Pane();
     private StackPane parentRoot;
-    private Recipe recipes;
+    private List<Recipe> recipes;
     private int currentRecipe = 0;
 
     private GridPane recipeTextCont = new GridPane();
@@ -42,11 +43,11 @@ public class RecipesPane {
 
         // Load the new recepies
         // Remove all nodes except those in row 0
-        if(!recipes.mixes.isEmpty()) {
+        if(!recipes.isEmpty()) {
             recipeTextCont.getChildren().removeIf(node -> GridPane.getRowIndex(node) != null && GridPane.getRowIndex(node) > 0);
 
             int row = 1;
-            Mix currentMix = recipes.mixes.get(currentRecipe);
+            Mix currentMix = recipes.get(currentRecipe).mix;
             for (Liquid entry : currentMix.getLiquids()) {
                 Text name = new Text(entry.getName());
                 Text amount = new Text(String.format("%.0f ml", currentMix.get(entry) * 1000)); // 0.5L total
@@ -56,7 +57,7 @@ public class RecipesPane {
                 row++;
             }
 
-            Text ratingStars = new Text(recipes.mixRecipes.get(recipes.mixes.get(currentRecipe)).getKey().toString() + "★");
+            Text ratingStars = new Text(recipes.get(currentRecipe).ratingToString());
             ratingStars.setStyle("-fx-font-weight: bold; -fx-font-size: 16;");
 
             recipeTextCont.add(ratingStars, 0, row);
@@ -107,14 +108,14 @@ public class RecipesPane {
         Button recipeChangeRight = new Button(">");
         Button recipeChangeLeft = new Button("<");
         recipeChangeRight.setOnAction(e -> {
-            if(currentRecipe != recipes.mixes.size()-1)
+            if(currentRecipe != recipes.size()-1)
                 currentRecipe++;
             changeDisplayedRecipe();
 
-            if(currentRecipe == recipes.mixes.size()-1) {
+            if(currentRecipe == recipes.size()-1) {
                 recipeChangeRight.setDisable(true);
             }
-            else if(currentRecipe - 1 > 0) {
+            else if(currentRecipe - 1 >= 0) {
                 recipeChangeLeft.setDisable(false);
             }
         });
@@ -127,7 +128,7 @@ public class RecipesPane {
             if(currentRecipe == 0) {
                 recipeChangeLeft.setDisable(true);
             }
-            else if(currentRecipe+1 < recipes.mixes.size()-1) {
+            else if(currentRecipe+1 < recipes.size()-1) {
                 recipeChangeRight.setDisable(false);
             }
         });
@@ -165,7 +166,12 @@ public class RecipesPane {
         this.parentRoot = parentRoot;
         this.recipesRootCont = new StackPane();
 
-        recipes = RecipeSerializer.getRecipesFromFile();
+        try {
+            recipes = RecipeSerializer.getRecipeFromFile("./src/main/resources/assets/recipes.ser");
+        } catch (ClassNotFoundException e) {
+            System.out.println("Error loading recipes");
+            recipes = new ArrayList<>();
+        }
 
         //setup visuals
         setupVisuals();
