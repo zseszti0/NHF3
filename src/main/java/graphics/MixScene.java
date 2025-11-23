@@ -4,12 +4,14 @@ import helperClasses.*;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
+import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
+import javafx.scene.text.Font;
 import main.Liquid;
 import main.Mix;
 import main.Recipe;
@@ -194,9 +196,53 @@ public class MixScene extends BaseScene{
             rowOffset++;
         }
     }
-    private void setupUI(GridPane actionButtonGrid){
+
+    private Button setupControlButtonGraphics(Font font, String labelText){
         //make the four control buttons
-        Button resetMixButton = new Button("Reset");
+        Button controlButton = new Button();
+
+        Sprite controlButtonSprite = new Sprite(154,95);
+        controlButtonSprite.addState("idle", "/assets/ui/controlButtonHover/buttonBase_00033.png");
+        controlButtonSprite.addStateAnimation("hover", "/assets/ui/controlButtonHover/");
+
+        controlButtonSprite.setState("idle");
+
+        Label controlButtonLabel = new Label(labelText);
+        //white with balck outline
+        controlButtonLabel.setStyle("-fx-text-fill: white; -fx-effect: dropshadow( gaussian , black , 5 , 0.5 , 0 , 0 );");
+
+        controlButtonLabel.setFont(font);
+        controlButtonLabel.setAlignment(Pos.CENTER);
+
+
+        StackPane resetButtonGraphicPane = new StackPane();
+        resetButtonGraphicPane.setPrefSize(154,95);
+        resetButtonGraphicPane.getChildren().addAll(controlButtonSprite,controlButtonLabel);
+
+        controlButton.setStyle("-fx-background-color: transparent;");
+        controlButton.setPrefSize(154,95);
+        controlButton.setGraphic(resetButtonGraphicPane);
+
+
+        controlButton.setOnMouseEntered(e -> {
+            controlButtonSprite.setState("hover");
+            controlButton.setScaleX(1.1);
+            controlButton.setScaleY(1.1);
+        });
+        controlButton.setOnMouseExited(e -> {
+            controlButtonSprite.setState("idle");
+            controlButton.setScaleX(1);
+            controlButton.setScaleY(1);
+        });
+
+        return controlButton;
+    }
+    private void setupUI(GridPane actionButtonGrid){
+        Font controlButtonFont = Font.loadFont(
+                getClass().getResource("/fonts/main.ttf").toExternalForm(),
+                32
+        );
+        Button resetMixButton = setupControlButtonGraphics(controlButtonFont, "Reset");
         resetMixButton.setOnAction(e -> {
             if(currentStage != SERVE) {
                 currentMix.reset();
@@ -207,7 +253,9 @@ public class MixScene extends BaseScene{
             }
         });
 
-        Button pourButton = new Button("Pour");
+
+
+        Button pourButton = setupControlButtonGraphics(controlButtonFont, "Pour");
         new PourButtonLogic(pourButton,bartender, poured -> {
             double amountToPut = 0;
             if(currentMix.getCurrentVolume() < 0.5) {
@@ -227,7 +275,7 @@ public class MixScene extends BaseScene{
             bartender.setState("choosing");
         });
 
-        Button shakeButton = new Button("Shake");
+        Button shakeButton = setupControlButtonGraphics(controlButtonFont, "Shake");
         shakeButton.setOnAction(e -> {
             if(currentStage != SERVE && currentMix.getCurrentVolume() > 0){
                 currentStage = SHAKE;
@@ -237,7 +285,7 @@ public class MixScene extends BaseScene{
             }
         });
 
-        Button serveButton = new Button("Serve");
+        Button serveButton = setupControlButtonGraphics(controlButtonFont, "Serve");
         serveButton.setOnAction(e -> {
             if(currentStage == SHAKE){
                 currentStage = SERVE;
@@ -261,17 +309,20 @@ public class MixScene extends BaseScene{
                 } catch (ClassNotFoundException ex) {
 
                 }
+
+                currentMix.reset();
             }
         });
 
         //Add action buttons to a grid for better layout
         //RESET----POUR----SHAKE----SERVE
 
-        actionButtonGrid.setHgap(100);
+        actionButtonGrid.setHgap(6);
+        actionButtonGrid.setVgap(-80);
         actionButtonGrid.setAlignment(Pos.CENTER);
-        actionButtonGrid.add(resetMixButton, 0, 0);
+        actionButtonGrid.add(resetMixButton, 0, 1);
         actionButtonGrid.add(pourButton, 1, 0);
-        actionButtonGrid.add(shakeButton, 2, 0);
+        actionButtonGrid.add(shakeButton, 2, 1);
         actionButtonGrid.add(serveButton, 3, 0);
     }
 
@@ -314,8 +365,8 @@ public class MixScene extends BaseScene{
         //UI
         GridPane actionButtonGrid = new GridPane();
         setupUI(actionButtonGrid);
-        actionButtonGrid.setLayoutX(100);
-        actionButtonGrid.setLayoutY(BaseScene.HEIGHT - 100);
+        actionButtonGrid.setLayoutX(60);
+        actionButtonGrid.setLayoutY(BaseScene.HEIGHT - 140);
 
 
         //put all the parts together and position
