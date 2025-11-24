@@ -24,6 +24,16 @@ public class Liquid implements Serializable {
 
     // Getters only (immutable objects are easier to reason about)
     public String getName() { return name; }
+    public String getFormatedName() {
+        //format the name, capital the first letter of each word, replace _ with space
+        String[] words = name.split("_");
+        StringBuilder sb = new StringBuilder();
+        for (String word : words) {
+            sb.append(Character.toUpperCase(word.charAt(0))).append(word.substring(1)).append(" ");
+        }
+
+        return sb.toString().trim();
+    }
     public String getType() { return type; }
     public double getAlcohol() { return alcohol; }
     public double getBitterness() { return bitterness; }

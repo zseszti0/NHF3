@@ -41,9 +41,14 @@ public class MixScene extends BaseScene{
     private Mix currentMix = new Mix();
     private MixStage currentStage = POUR;
 
+    private Font mainFont;
+
     private Sprite bartender;
 
     private GridPane liquidGrid;
+    private Label liquidSelectionText;
+
+    private StackPane currentLiquidDisplayPane;
 
     public MixScene() {
         super(SceneManager.mainStage, "mix");
@@ -152,7 +157,7 @@ public class MixScene extends BaseScene{
         }
 
         bartenderCont.getChildren().add(bartender);
-        bartender.setLayoutX(BaseScene.WIDTH-530);
+        bartender.setLayoutX(BaseScene.WIDTH-630);
         bartender.setLayoutY(90);
 
         bartender.setState("idle");
@@ -162,7 +167,38 @@ public class MixScene extends BaseScene{
             selectedIndex = index;
             bartender.setState("choosing");
 
+            if(!currentLiquidDisplayPane.getChildren().isEmpty()){
+                Button lastSelected = (Button) currentLiquidDisplayPane.getChildren().getFirst();
+                liquidGrid.getChildren().add(lastSelected);
+                currentLiquidDisplayPane.getChildren().clear();
+                lastSelected.setStyle("-fx-background-color: transparent;");
+            }
+            currentLiquidDisplayPane.getChildren().add(liquidButton);
+            //add orange dropshadow effect
+            liquidButton.setStyle("-fx-background-color: transparent;" +
+                    " -fx-effect: dropshadow( gaussian , #a106c1 , 4 , 3 , 0 , 0 );");
         });
+    }
+    private void setupFullLiquidUI(){
+        //load the liquids from the file
+        try {
+            availableLiquids = LiquidLoader.loadDrinks("./src/main/resources/assets/liquids.txt");
+        }
+        catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        //make the buttons, from loading the liquid sprites from name
+        liquidGrid = new GridPane();
+        setupLiquids(availableLiquids);
+
+
+        liquidGrid.setHgap(0);
+        liquidGrid.setVgap(8);
+        liquidGrid.setPadding(new Insets(20));
+        liquidGrid.setLayoutX(100);
+        liquidGrid.setLayoutY(90);
+
     }
     private void setupLiquids(List<Liquid> liquids) {
         int rowCount = 0;
@@ -188,6 +224,11 @@ public class MixScene extends BaseScene{
             liquidButton.setPrefSize(70,122.42);
             liquidButton.setAlignment(Pos.CENTER);
             setLiquidButtonOnClick(liquidButton, i);
+
+            int finalI = i;
+            liquidButton.setOnMouseEntered(e ->
+                    liquidSelectionText.setText(liquids.get(finalI).getFormatedName())
+            );
 
 
             //add the button to the grid
@@ -237,25 +278,34 @@ public class MixScene extends BaseScene{
 
         return controlButton;
     }
+
+    private void stageReset(){
+        currentMix.reset();
+        selectedIndex = 0;
+        currentStage = POUR;
+
+        bartender.setState("idle");
+
+        if(!currentLiquidDisplayPane.getChildren().isEmpty()){
+            Button lastSelected = (Button) currentLiquidDisplayPane.getChildren().getFirst();
+            liquidGrid.getChildren().add(lastSelected);
+            currentLiquidDisplayPane.getChildren().clear();
+            lastSelected.setStyle("-fx-background-color: transparent;");
+        }
+
+        liquidSelectionText.setText("");
+    }
     private void setupUI(GridPane actionButtonGrid){
-        Font controlButtonFont = Font.loadFont(
-                getClass().getResource("/fonts/main.ttf").toExternalForm(),
-                32
-        );
-        Button resetMixButton = setupControlButtonGraphics(controlButtonFont, "Reset");
+        Button resetMixButton = setupControlButtonGraphics(mainFont, "Reset");
         resetMixButton.setOnAction(e -> {
             if(currentStage != SERVE) {
-                currentMix.reset();
-                selectedIndex = 0;
-                currentStage = POUR;
-
-                bartender.setState("idle");
+                stageReset();
             }
         });
 
 
 
-        Button pourButton = setupControlButtonGraphics(controlButtonFont, "Pour");
+        Button pourButton = setupControlButtonGraphics(mainFont, "Pour");
         new PourButtonLogic(pourButton,bartender, poured -> {
             double amountToPut = 0;
             if(currentMix.getCurrentVolume() < 0.5) {
@@ -269,13 +319,14 @@ public class MixScene extends BaseScene{
                 amountToPut = currentMix.get(availableLiquids.get(selectedIndex)) + poured;
                 amountToPut = amountToPut + currentMix.getCurrentVolume() >= 0.5 ? 0.5 - currentMix.getCurrentVolume() : amountToPut;
                 currentMix.put(availableLiquids.get(selectedIndex), amountToPut);
+
+                System.out.println(currentMix.toString());
             }
-            System.out.println("Poured yet: " + String.format("%.3f l",amountToPut));
 
             bartender.setState("choosing");
         });
 
-        Button shakeButton = setupControlButtonGraphics(controlButtonFont, "Shake");
+        Button shakeButton = setupControlButtonGraphics(mainFont, "Shake");
         shakeButton.setOnAction(e -> {
             if(currentStage != SERVE && currentMix.getCurrentVolume() > 0){
                 currentStage = SHAKE;
@@ -285,7 +336,7 @@ public class MixScene extends BaseScene{
             }
         });
 
-        Button serveButton = setupControlButtonGraphics(controlButtonFont, "Serve");
+        Button serveButton = setupControlButtonGraphics(mainFont, "Serve");
         serveButton.setOnAction(e -> {
             if(currentStage == SHAKE){
                 currentStage = SERVE;
@@ -324,12 +375,52 @@ public class MixScene extends BaseScene{
         actionButtonGrid.add(pourButton, 1, 0);
         actionButtonGrid.add(shakeButton, 2, 1);
         actionButtonGrid.add(serveButton, 3, 0);
+
+        actionButtonGrid.setLayoutX(60);
+        actionButtonGrid.setLayoutY(BaseScene.HEIGHT - 140);
     }
 
+
+    private void setupStatePanel(Pane statePanelCont){
+        StackPane statePanelPane = new StackPane();
+
+        Sprite statePanel = new Sprite(283,196);
+        statePanel.addState("idle", "/assets/ui/statePanelAnim/statePanel_00059.png");
+        statePanel.setState("idle");
+
+        statePanel.addStateAnimation("anime", "/assets/ui/statePanelAnim/");
+
+
+        liquidSelectionText.setFont(mainFont);
+
+
+        //white text, with 60 pt font size and black outline
+        liquidSelectionText.setStyle("-fx-text-fill: white; -fx-effect: dropshadow( gaussian , black , 7 , 0.5 , 0 , 0 );");
+        liquidSelectionText.setScaleX(1.2);
+        liquidSelectionText.setScaleY(1.2);
+
+
+        liquidSelectionText.setPadding(new Insets(40,0,0,8));
+
+        statePanelPane.getChildren().addAll(statePanel, liquidSelectionText);
+        statePanelCont.getChildren().add(statePanelPane);
+        statePanelCont.setPrefSize(BaseScene.WIDTH, BaseScene.HEIGHT);
+
+        statePanelPane.setPrefSize(283,196);
+        statePanelPane.setLayoutX(BaseScene.WIDTH - 283);
+        statePanelPane.setLayoutY(BaseScene.HEIGHT - 196);
+
+    }
     @Override
     protected StackPane createContainer() {
         //root container of all objects
         StackPane root = new StackPane();
+
+        //mainFont
+        mainFont = Font.loadFont(
+                getClass().getResource("/fonts/main.ttf").toExternalForm(),
+                32
+        );
 
         //background
         Image bg = new Image(Objects.requireNonNull(getClass().getResource("/assets/backgrounds/mixMenu.png")).toExternalForm());
@@ -338,24 +429,18 @@ public class MixScene extends BaseScene{
         bgView.setFitHeight(BaseScene.HEIGHT);
 
         //LIQUID ICON(button)S----------------
-        //load the liquids from the file
-        try {
-            availableLiquids = LiquidLoader.loadDrinks("./src/main/resources/assets/liquids.txt");
-        }
-        catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        setupFullLiquidUI();
+        //setup the currentlySelected box
+        currentLiquidDisplayPane = new StackPane();
+        currentLiquidDisplayPane.setPrefSize(70,122.42);
+        //position it using Pane
+        Pane currentLiquidDisplayCont = new Pane();
+        currentLiquidDisplayCont.setPrefSize(BaseScene.WIDTH,BaseScene.HEIGHT);
+        currentLiquidDisplayCont.getChildren().add(currentLiquidDisplayPane);
 
-        //make the buttons, from loading the liquid sprites from name
-        liquidGrid = new GridPane();
-        setupLiquids(availableLiquids);
+        currentLiquidDisplayPane.setLayoutX(BaseScene.WIDTH /2 + 280);
+        currentLiquidDisplayPane.setLayoutY(BaseScene.HEIGHT - 165);
 
-
-        liquidGrid.setHgap(0);
-        liquidGrid.setVgap(8);
-        liquidGrid.setPadding(new Insets(20));
-        liquidGrid.setLayoutX(100);
-        liquidGrid.setLayoutY(90);
 
         //Bartender
         Pane bartenderCont = new Pane();
@@ -365,8 +450,12 @@ public class MixScene extends BaseScene{
         //UI
         GridPane actionButtonGrid = new GridPane();
         setupUI(actionButtonGrid);
-        actionButtonGrid.setLayoutX(60);
-        actionButtonGrid.setLayoutY(BaseScene.HEIGHT - 140);
+
+        //State panel
+        liquidSelectionText = new Label();
+        Pane statePanelCont = new Pane();
+        setupStatePanel(statePanelCont);
+
 
 
         //put all the parts together and position
@@ -376,8 +465,14 @@ public class MixScene extends BaseScene{
         buttonPane.getChildren().addAll(liquidGrid,actionButtonGrid);
 
         //add everything to root
-        root.getChildren().addAll(bgView, bartenderCont ,buttonPane);
+        root.getChildren().addAll(bgView, bartenderCont ,currentLiquidDisplayCont, statePanelCont, buttonPane);
 
         return root;
+    }
+
+    @Override
+    public void show() {
+        super.show();
+        stageReset();
     }
 }
