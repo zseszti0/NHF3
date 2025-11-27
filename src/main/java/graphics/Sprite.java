@@ -1,9 +1,11 @@
 package graphics;
 
 import helperClasses.AnimationPresets;
-import javafx.animation.AnimationTimer;
+import javafx.animation.Interpolator;
+import javafx.animation.KeyValue;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.util.Duration;
 
 
 import java.io.File;
@@ -18,10 +20,7 @@ public class Sprite extends ImageView {
     private final int WIDTH;
     private final int HEIGHT;
 
-    private AnimationTimer animationTimer;
-    private long lastFrameTime = 0;
-    private int frameIndex = 0;
-    private double frameDuration = 16_666_666; // 120 ms per frame (in nanoseconds)
+    private Animator currentAnimator;
 
 
     public Sprite(int w, int h) {
@@ -32,7 +31,7 @@ public class Sprite extends ImageView {
     public void addState(String name, String imagePath) {
         List<Image> newStateImage = new ArrayList<>();
         newStateImage.add(new Image(imagePath));
-        frames.put(name,newStateImage);
+        frames.put(name, newStateImage);
     }
 
     public void addStateAnimation(String name, String folderPath) {
@@ -40,12 +39,11 @@ public class Sprite extends ImageView {
         File folder;
         List<Image> newStateAnim = new ArrayList<>();
 
-        try{
+        try {
             folderURL = getClass().getResource(folderPath);
             assert folderURL != null;
             folder = new File(folderURL.toURI());
-        }
-        catch (URISyntaxException e){
+        } catch (URISyntaxException e) {
             System.err.println("⚠ Folder not found in resources!");
             return;
         }
@@ -56,14 +54,22 @@ public class Sprite extends ImageView {
                 newStateAnim.add(new Image(imagePath));
             }
         }
-        frames.put(name,newStateAnim);
+        frames.put(name, newStateAnim);
     }
 
     public void setState(String name) {
-        if (animationTimer != null)
-            animationTimer.stop();
+        setState(name, false);
+    }
 
-        Image img = frames.get(name).getFirst();
+    public void setState(String name, boolean cascade) {
+        if (!cascade && currentAnimator != null) {
+            currentAnimator.stop();
+        }
+
+        List<Image> frameList = frames.get(name);
+        if (frameList == null || frameList.isEmpty()) return;
+
+        Image img = frameList.getFirst();
         if (img != null) {
             setImage(img);
             currentFrameKey = name;
@@ -71,47 +77,40 @@ public class Sprite extends ImageView {
             setFitWidth(WIDTH);
             setFitHeight(HEIGHT);
 
-            if(frames.get(name).size() == 1)
-                AnimationPresets.TwitchDownAndUp(this);
-            else{
-
-                startAnimation(name);
+            if (frames.get(name).size() == 1) {
+                Animator anim = AnimationPresets.TwitchDownAndUp(this);
+                if (cascade && currentAnimator != null) {
+                    currentAnimator.cascadeAnimation(anim);
+                } else {
+                    currentAnimator = anim;
+                    currentAnimator.play();
+                }
+            } else {
+                startAnimation(name, cascade);
             }
         }
     }
 
-    private void startAnimation(String stateName) {
+    private void startAnimation(String stateName, boolean cascade) {
         List<Image> animFrames = frames.get(stateName);
-        frameIndex = 0;
+        if (animFrames == null || animFrames.isEmpty()) return;
 
-        if (animationTimer != null) animationTimer.stop();
+        Animator newAnim = new Animator(this);
+        // Default to approx 24 FPS (41ms)
+        double frameDuration = 16.0;
 
-        animationTimer = new AnimationTimer() {
-            @Override
-            public void handle(long now) {
+        for (int i = 0; i < animFrames.size(); i++) {
+            newAnim.addKeyFrame(Duration.millis(i * frameDuration),
+                    new KeyValue(this.imageProperty(), animFrames.get(i), Interpolator.DISCRETE)
+            );
+        }
 
-                if (now - lastFrameTime >= frameDuration) {
-                    lastFrameTime = now;
-
-                    // Set current frame
-                    setImage(animFrames.get(frameIndex));
-
-                    // Advance frame if not at the last one
-                    if (frameIndex < animFrames.size() - 1) {
-                        frameIndex++;
-                    } else {
-                        // Stop on last frame
-                        animationTimer.stop();
-                    }
-                }
-            }
-        };
-
-        animationTimer.start();
-    }
-
-
-    public String getCurrentState() {
-        return currentFrameKey;
+        if (cascade && currentAnimator != null) {
+            currentAnimator.cascadeAnimation(newAnim);
+        } else {
+            if (currentAnimator != null) currentAnimator.stop();
+            currentAnimator = newAnim;
+            currentAnimator.play();
+        }
     }
 }

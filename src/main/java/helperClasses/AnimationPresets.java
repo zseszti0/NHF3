@@ -6,7 +6,7 @@ import javafx.scene.Node;
 import javafx.util.Duration;
 
 public class AnimationPresets {
-    public static void TwitchDownAndUp(Node target){
+    public static Animator TwitchDownAndUp(Node target){
         Animator anim = new Animator(target);
 
         double startY = target.getLayoutY();
@@ -23,10 +23,10 @@ public class AnimationPresets {
                 new KeyValue(target.layoutYProperty(), startY)
         );
 
-        anim.play();
+        return anim;
     }
 
-    public static void EscapeMenuAppear(Node target){
+    public static Animator EscapeMenuAppear(Node target){
         Animator anim = new Animator(target);
 
         //starts invisible, squashed down, with slightly smaller scaling, and 0.5 opacity
@@ -49,6 +49,7 @@ public class AnimationPresets {
                 new KeyValue(target.scaleXProperty(), 1),
                 new KeyValue(target.scaleYProperty(), 1)
         );
-        anim.play();
+
+        return anim;
     }
 }

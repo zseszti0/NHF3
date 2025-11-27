@@ -7,21 +7,32 @@ import javafx.animation.Timeline;
 import javafx.scene.control.Button;
 import javafx.util.Duration;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 public class PourButtonLogic {
     private final Button pourButton;
     private final Consumer<Double> onPourFinished; // callback
+    private final Supplier<Double> getFlowRate;
+    private final Supplier<Double> getBaseVolume;
+
     private double pouredAmount = 0.0;
+    private double currentBaseVolume = 0.0;
+    private double currentFlowRate = 0.0;
     private Timeline pouringTimeline;
 
     private Sprite bartender;
 
+    private Cup cup;
 
 
-    public PourButtonLogic(Button pourButton, Sprite bartender, Cup cup, Consumer<Double> onPourFinished) {
+
+    public PourButtonLogic(Button pourButton, Sprite bartender, Cup cup, Supplier<Double> getFlowRate, Supplier<Double> getBaseVolume, Consumer<Double> onPourFinished) {
+        this.cup = cup;
         this.pourButton = pourButton;
         this.onPourFinished = onPourFinished;
         this.bartender = bartender;
+        this.getFlowRate = getFlowRate;
+        this.getBaseVolume = getBaseVolume;
         setupPourButton();
     }
 
@@ -37,6 +48,9 @@ public class PourButtonLogic {
 
     private void startPouring() {
         pouredAmount = 0;
+        // Snapshot current state
+        currentBaseVolume = getBaseVolume.get();
+        currentFlowRate = getFlowRate.get();
         pouringTimeline.play();
 
         bartender.setState("filling");
@@ -53,6 +67,8 @@ public class PourButtonLogic {
     }
 
     private void pourStep(double deltaTime) {
-        pouredAmount +=  deltaTime;
+        double volumeTick = deltaTime * currentFlowRate;
+        pouredAmount += volumeTick;
+        cup.updateFill(currentBaseVolume + pouredAmount);
     }
 }

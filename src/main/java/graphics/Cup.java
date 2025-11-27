@@ -15,13 +15,13 @@ public class Cup {
     private DoubleProperty currentVolume = new SimpleDoubleProperty(0.0);
 
     private Polygon liquidShape = new Polygon(
-            20.0, 0.0,   // top left
-            100.0, 0.0,  // top right
-            80.0, 150.0, // bottom right
-            40.0, 150.0  // bottom left
+            3.5, 0.0,   // top left
+            64.5, 0.0,  // top right
+            51.5, 92.0, // bottom right
+            16.5, 92.0  // bottom left
     );
 
-    private Rectangle fillMask = new Rectangle(120, 150);
+    private Rectangle fillMask = new Rectangle(68, 92);
 
     private StackPane cupRoot = new StackPane();
 
@@ -32,18 +32,28 @@ public class Cup {
         // Color of the liquid
         liquidShape.setFill(color);
 
-        fillMask.setY(150 - fillMask.getHeight());
+        // Remove static Y setting. We will bind it below to animate from bottom up.
         liquidShape.setClip(fillMask);
 
         fillMask.heightProperty().bind(
-                currentVolume.divide(maxVolume).multiply(150) // polygon height
+                currentVolume.divide(maxVolume).multiply(90) // polygon height
+        );
+
+        // Bind Y so the mask grows from the bottom upwards
+        fillMask.yProperty().bind(
+                fillMask.heightProperty().multiply(-1).add(90)
         );
 
         ImageView cupImage = new ImageView(new Image("assets/ui/cup.png"));
-        cupImage.setFitWidth(120);
-        cupImage.setFitHeight(160);
+        cupImage.setFitWidth(68);
+        cupImage.setFitHeight(111);
 
-        cupRoot.getChildren().addAll(liquidShape, cupImage);
+        //grey bacgkround, with the same shape as the liquidShape
+        Polygon fillBackground = new Polygon();
+        fillBackground.getPoints().addAll(liquidShape.getPoints());
+        fillBackground.setFill(Color.GREY);
+
+        cupRoot.getChildren().addAll(fillBackground,liquidShape,cupImage);
     }
 
     public void updateFill(double newValue){
