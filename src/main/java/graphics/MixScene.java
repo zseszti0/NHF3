@@ -1,6 +1,8 @@
 package graphics;
 
 import helperClasses.*;
+import javafx.beans.property.DoubleProperty;
+import javafx.beans.property.SimpleDoubleProperty;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
@@ -11,6 +13,7 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
+import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import main.Liquid;
 import main.Mix;
@@ -32,7 +35,7 @@ import static java.lang.Thread.sleep;
 public class MixScene extends BaseScene{
     public static final int ESC_WIDTH = 820;
     public static final int ESC_HEIGHT = 580;
-    
+
     private Pane escapeMenuRootCont;
     private boolean isEscUp = false;
 
@@ -70,7 +73,6 @@ public class MixScene extends BaseScene{
 
         escapeMenuRootCont = new Pane();
         escapeMenuRootCont.setPrefSize(BaseScene.WIDTH, BaseScene.HEIGHT);
-
 
         setupEscapeMenu();
 
@@ -295,7 +297,7 @@ public class MixScene extends BaseScene{
 
         liquidSelectionText.setText("");
     }
-    private void setupUI(GridPane actionButtonGrid){
+    private void setupActionButtons(GridPane actionButtonGrid){
         Button resetMixButton = setupControlButtonGraphics(mainFont, "Reset");
         resetMixButton.setOnAction(e -> {
             if(currentStage != SERVE) {
@@ -380,6 +382,13 @@ public class MixScene extends BaseScene{
         actionButtonGrid.setLayoutY(BaseScene.HEIGHT - 140);
     }
 
+    private void setupCup(Pane cupCont){
+        Cup cup = new Cup(0.5, new Color(0, 0, 0, 0));
+        cupCont.getChildren().add(cup.getRoot());
+        cup.getRoot().setLayoutX(BaseScene.WIDTH /2 + 200);
+        cup.getRoot().setLayoutY(BaseScene.HEIGHT - 165);
+    }
+
 
     private void setupStatePanel(Pane statePanelCont){
         StackPane statePanelPane = new StackPane();
@@ -449,12 +458,17 @@ public class MixScene extends BaseScene{
 
         //UI
         GridPane actionButtonGrid = new GridPane();
-        setupUI(actionButtonGrid);
+        setupActionButtons(actionButtonGrid);
 
         //State panel
         liquidSelectionText = new Label();
         Pane statePanelCont = new Pane();
         setupStatePanel(statePanelCont);
+
+        //cup
+        Pane cupCont = new Pane();
+        cupCont.setPrefSize(BaseScene.WIDTH, BaseScene.HEIGHT);
+        setupCup(cupCont);
 
 
 
@@ -465,7 +479,7 @@ public class MixScene extends BaseScene{
         buttonPane.getChildren().addAll(liquidGrid,actionButtonGrid);
 
         //add everything to root
-        root.getChildren().addAll(bgView, bartenderCont ,currentLiquidDisplayCont, statePanelCont, buttonPane);
+        root.getChildren().addAll(bgView, bartenderCont ,currentLiquidDisplayCont,cupCont, statePanelCont, buttonPane);
 
         return root;
     }

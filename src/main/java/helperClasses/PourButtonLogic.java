@@ -1,5 +1,6 @@
 package helperClasses;
 
+import graphics.Cup;
 import graphics.Sprite;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
@@ -17,7 +18,7 @@ public class PourButtonLogic {
 
 
 
-    public PourButtonLogic(Button pourButton, Sprite bartender, Consumer<Double> onPourFinished) {
+    public PourButtonLogic(Button pourButton, Sprite bartender, Cup cup, Consumer<Double> onPourFinished) {
         this.pourButton = pourButton;
         this.onPourFinished = onPourFinished;
         this.bartender = bartender;
