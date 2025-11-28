@@ -1,11 +1,9 @@
 package graphics;
 
-import com.sun.jdi.Value;
 import helperClasses.AnimationLockRegistry;
 import javafx.animation.*;
 import javafx.beans.value.WritableValue;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
+
 import javafx.scene.Node;
 import javafx.util.Duration;
 
@@ -14,14 +12,29 @@ import java.util.List;
 
 public class Animator {
 
-    private final Node target;
+    private Node target;
     private final List<KeyFrame> frames = new ArrayList<>();
 
     private Timeline timeline;
 
+
+
     public Animator(Node target) {
+
         this.target = target;
+
     }
+
+    private static List<WritableValue<?>> getProps(List<KeyFrame> fr){
+        List<WritableValue<?>> props = new ArrayList<>();
+        for(KeyFrame kf : fr){
+            for(KeyValue kv : kf.getValues()){
+                props.add(kv.getTarget());
+            }
+        }
+        return props;
+    }
+
 
     public Animator addKeyFrame(Duration d, KeyValue... kvs) {
         frames.add(new KeyFrame(d, kvs));
@@ -42,12 +55,7 @@ public class Animator {
 
         frames.addAll(timeAdjustedNewFrames);
 
-        List<WritableValue<?>> allProps = new ArrayList<>();
-        for (KeyFrame kf : frames) {
-            for (KeyValue kv : kf.getValues()) {
-                allProps.add(kv.getTarget());
-            }
-        }
+        List<WritableValue<?>> allProps = getProps(frames);
 
         AnimationLockRegistry.lockProperties(target,allProps);
 
@@ -58,7 +66,9 @@ public class Animator {
         timeline = appendedTimeline;
         timeline.playFrom(currentTime);
 
-        timeline.setOnFinished(e -> AnimationLockRegistry.unlockProperties(target,allProps));
+        timeline.setOnFinished(e -> {
+            AnimationLockRegistry.unlockProperties(target,allProps);
+        });
     }
 
     private List<KeyFrame> getFrames() {
@@ -67,12 +77,7 @@ public class Animator {
 
     public void play() {
         // Collect all properties that this animation wants to modify
-        List<WritableValue<?>> props = new ArrayList<>();
-        for (KeyFrame kf : frames) {
-            for (KeyValue kv : kf.getValues()) {
-                props.add(kv.getTarget());
-            }
-        }
+        List<WritableValue<?>> props = getProps(frames);
 
         // BLOCK THIS ANIMATION if ANY property is already locked
         if (AnimationLockRegistry.anyPropertyLocked(target, props)) {
@@ -88,8 +93,9 @@ public class Animator {
         timeline.getKeyFrames().addAll(frames);
 
         // Unlock after animation finishes
-        timeline.setOnFinished(e -> AnimationLockRegistry.unlockProperties(target, props));
-
+        timeline.setOnFinished(e -> {
+            AnimationLockRegistry.unlockProperties(target,props);
+        });
         timeline.play();
     }
 
@@ -98,12 +104,7 @@ public class Animator {
             timeline.stop();
 
             // Collect all properties that this animation modified to unlock them manually
-            List<WritableValue<?>> props = new ArrayList<>();
-            for (KeyFrame kf : frames) {
-                for (KeyValue kv : kf.getValues()) {
-                    props.add(kv.getTarget());
-                }
-            }
+            List<WritableValue<?>> props = getProps(frames);
 
             AnimationLockRegistry.unlockProperties(target, props);
         }

@@ -14,6 +14,7 @@ public class Cup {
     private double maxVolume;
     private DoubleProperty currentVolume = new SimpleDoubleProperty(0.0);
 
+
     private Polygon liquidShape = new Polygon(
             3.5, 0.0,   // top left
             64.5, 0.0,  // top right
@@ -26,11 +27,11 @@ public class Cup {
     private StackPane cupRoot = new StackPane();
 
 
-    public Cup(double max, Color color){
+    public Cup(double max){
         maxVolume = max;
 
         // Color of the liquid
-        liquidShape.setFill(color);
+        liquidShape.setFill(Color.WHITE);
 
         // Remove static Y setting. We will bind it below to animate from bottom up.
         liquidShape.setClip(fillMask);
@@ -64,5 +65,9 @@ public class Cup {
 
     public StackPane getRoot(){
         return cupRoot;
+    }
+
+    public void setColor(Color color) {
+         liquidShape.setFill(color);
     }
 }

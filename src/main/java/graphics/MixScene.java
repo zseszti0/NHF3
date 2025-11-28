@@ -58,22 +58,6 @@ public class MixScene extends BaseScene{
         super(SceneManager.mainStage, "mix");
 
 
-        scene.setOnKeyPressed(event -> {
-            if(event.getCode() == KeyCode.ESCAPE) {
-                if(isEscUp) {
-                    root.getChildren().remove(escapeMenuRootCont);
-                    isEscUp = false;
-                }
-                else {
-                    root.getChildren().add(escapeMenuRootCont);
-
-                    Animator anim1 = AnimationPresets.EscapeMenuAppear(escapeMenuRootCont.getChildren().get(1));
-                    anim1.play();
-                    isEscUp = true;
-                }
-            }
-        });
-
         escapeMenuRootCont = new Pane();
         escapeMenuRootCont.setPrefSize(BaseScene.WIDTH, BaseScene.HEIGHT);
 
@@ -85,8 +69,10 @@ public class MixScene extends BaseScene{
         StackPane escapeParentRoot = new StackPane();
         escapeParentRoot.setPrefSize(ESC_WIDTH, ESC_HEIGHT);
         //bg
-        Image bg = new Image(Objects.requireNonNull(getClass().getResource("/assets/ui/escapeMenu.png")).toExternalForm());
-        ImageView bgView = new ImageView(bg);
+        Sprite bgView = new Sprite(870,634);
+        bgView.addState("idle", "/assets/ui/escPanel/escMenu_00059.png");
+        bgView.addStateAnimation("fade", "/assets/ui/escPanel/");
+        bgView.setState("idle");
         bgView.setFitWidth(ESC_WIDTH);
         bgView.setFitHeight(ESC_HEIGHT);
 
@@ -136,6 +122,23 @@ public class MixScene extends BaseScene{
         multiplyOverlay.setFitHeight(BaseScene.HEIGHT);
 
         escapeMenuRootCont.getChildren().addAll(multiplyOverlay,escapeParentRoot);
+
+        scene.setOnKeyPressed(event -> {
+            if(event.getCode() == KeyCode.ESCAPE) {
+                if(isEscUp) {
+                    root.getChildren().remove(escapeMenuRootCont);
+                    isEscUp = false;
+                }
+                else {
+                    root.getChildren().add(escapeMenuRootCont);
+
+                    Animator anim1 = AnimationPresets.EscapeMenuAppear(escapeParentRoot);
+                    anim1.play();
+                    bgView.setState("fade",true);
+                    isEscUp = true;
+                }
+            }
+        });
 
     }
     private void setupBartender(Pane bartenderCont){
@@ -236,9 +239,11 @@ public class MixScene extends BaseScene{
             setLiquidButtonOnClick(liquidButton, i);
 
             int finalI = i;
-            liquidButton.setOnMouseEntered(e ->
-                    liquidSelectionText.setText(liquids.get(finalI).getFormatedName())
-            );
+            liquidButton.setOnMouseEntered(e -> {
+                liquidSelectionText.setText(liquids.get(finalI).getFormatedName());
+                liquidSelectionText.setScaleX(1.2);
+                liquidSelectionText.setScaleY(1.2);
+            });
 
 
             //add the button to the grid
@@ -307,10 +312,18 @@ public class MixScene extends BaseScene{
         }
 
         liquidSelectionText.setText("");
-        cup.updateFill(0);
+
 
     }
+    private void statePanelRatingAnimation(){
+        Animator thinkingText = AnimationPresets.RatingTextThinking(liquidSelectionText);
+        Animator ratingText = AnimationPresets.RateingTextRating(liquidSelectionText,
+                new RateDrink(currentMix).getRating());
 
+        thinkingText.play();
+        thinkingText.cascadeAnimation(ratingText);
+
+    }
     private void rate(){
         if(currentStage == SHAKE){
             currentStage = SERVE;
@@ -335,6 +348,8 @@ public class MixScene extends BaseScene{
 
             }
 
+            statePanelRatingAnimation();
+
             currentMix.reset();
         }
     }
@@ -347,7 +362,7 @@ public class MixScene extends BaseScene{
         });
 
 
-
+        currentMix = new Mix();
         Button pourButton = setupControlButtonGraphics(mainFont, "Pour");
         new PourButtonLogic(pourButton, bartender, cup,
                 () -> {
@@ -373,6 +388,8 @@ public class MixScene extends BaseScene{
                         currentMix.put(availableLiquids.get(selectedIndex), currentLiquidAmount + actualAdded);
 
                         System.out.println(currentMix.toString());
+
+                        cup.setColor(Mix.calculateColor(currentMix));
                     }
 
                     bartender.setState("choosing");
@@ -390,6 +407,8 @@ public class MixScene extends BaseScene{
 
         Button serveButton = setupControlButtonGraphics(mainFont, "Serve");
         serveButton.setOnAction(e -> {
+            cup.updateFill(0);
+            cup.setColor(Color.WHITE);
             rate();
         });
 
@@ -409,7 +428,7 @@ public class MixScene extends BaseScene{
     }
 
     private void setupCup(Pane cupCont){
-        cup = new Cup(0.5, Color.BLUE);
+        cup = new Cup(0.5);
         cupCont.getChildren().add(cup.getRoot());
         cup.getRoot().setLayoutX(BaseScene.WIDTH /2 + 142);
         cup.getRoot().setLayoutY(BaseScene.HEIGHT - 140);

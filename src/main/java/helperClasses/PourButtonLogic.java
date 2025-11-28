@@ -6,6 +6,8 @@ import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.scene.control.Button;
 import javafx.util.Duration;
+import main.Mix;
+
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
@@ -70,5 +72,6 @@ public class PourButtonLogic {
         double volumeTick = deltaTime * currentFlowRate;
         pouredAmount += volumeTick;
         cup.updateFill(currentBaseVolume + pouredAmount);
+
     }
 }
