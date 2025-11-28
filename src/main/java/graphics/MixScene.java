@@ -70,7 +70,7 @@ public class MixScene extends BaseScene{
         escapeParentRoot.setPrefSize(ESC_WIDTH, ESC_HEIGHT);
         //bg
         Sprite bgView = new Sprite(870,634);
-        bgView.addState("idle", "/assets/ui/escPanel/escMenu_00059.png");
+        bgView.addState("idle", "/assets/ui/escPanel/escMenu_00053.png");
         bgView.addStateAnimation("fade", "/assets/ui/escPanel/");
         bgView.setState("idle");
         bgView.setFitWidth(ESC_WIDTH);
@@ -87,12 +87,18 @@ public class MixScene extends BaseScene{
         Button backButton = new Button("Back");
         backButton.setOnAction(e -> {
             root.getChildren().remove(escapeMenuRootCont);
-            SceneManager.loadScene("main menu");});
+            SceneManager.loadScene("main menu");
+
+        });
+        backButton.setOnMouseEntered(escapeMenuRootCont -> bgView.setState("fade"));
+        backButton.setOnMouseExited(escapeMenuRootCont -> bgView.setState("idle"));
 
         Button recipesButton = new Button("Recipes");
         recipesButton.setOnAction(e -> {
             RecipesPane recipesPane = new RecipesPane(root);
         });
+        recipesButton.setOnMouseEntered(escapeMenuRootCont -> bgView.setState("fade"));
+        recipesButton.setOnMouseExited(escapeMenuRootCont -> bgView.setState("idle"));
 
         //button pane
         Pane buttonPane = new Pane();
