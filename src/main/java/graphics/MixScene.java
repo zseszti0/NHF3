@@ -39,6 +39,8 @@ public class MixScene extends BaseScene{
     private Pane escapeMenuRootCont;
     private boolean isEscUp = false;
 
+    private boolean isRecipeBookOpen = false;
+
     private int selectedIndex = 0;
     private List<Liquid> availableLiquids;
     private Mix currentMix = new Mix();
@@ -54,6 +56,7 @@ public class MixScene extends BaseScene{
 
     private StackPane currentLiquidDisplayPane;
 
+
     public MixScene() {
         super(SceneManager.mainStage, "mix");
 
@@ -62,7 +65,6 @@ public class MixScene extends BaseScene{
         escapeMenuRootCont.setPrefSize(BaseScene.WIDTH, BaseScene.HEIGHT);
 
         setupEscapeMenu();
-
     }
 
     private void setupEscapeMenu() {
@@ -70,51 +72,57 @@ public class MixScene extends BaseScene{
         escapeParentRoot.setPrefSize(ESC_WIDTH, ESC_HEIGHT);
         //bg
         Sprite bgView = new Sprite(870,634);
-        bgView.addState("idle", "/assets/ui/escPanel/escMenu_00053.png");
+        bgView.addState("idle", "/assets/ui/escPanel/escMenu_00000.png");
         bgView.addStateAnimation("fade", "/assets/ui/escPanel/");
         bgView.setState("idle");
         bgView.setFitWidth(ESC_WIDTH);
         bgView.setFitHeight(ESC_HEIGHT);
 
-        //close button
-        Button closeButton = new Button("X");
-        closeButton.setOnAction(e ->{
-            root.getChildren().remove(escapeMenuRootCont);
-            isEscUp = false;
-        });
 
         //add the back and recepies buttons
-        Button backButton = new Button("Back");
+        Button backButton = setupControlButtonGraphics(mainFont, "Back",154,95,"/assets/ui/controlButtonHover/buttonBase_00033.png");
         backButton.setOnAction(e -> {
             root.getChildren().remove(escapeMenuRootCont);
             SceneManager.loadScene("main menu");
 
         });
-        backButton.setOnMouseEntered(escapeMenuRootCont -> bgView.setState("fade"));
-        backButton.setOnMouseExited(escapeMenuRootCont -> bgView.setState("idle"));
-
-        Button recipesButton = new Button("Recipes");
-        recipesButton.setOnAction(e -> {
-            RecipesPane recipesPane = new RecipesPane(root);
+        backButton.setOnMouseEntered(e -> {
+                bgView.setState("fade");
+                backButton.setScaleX(1.1);
+                backButton.setScaleY(1.1);
         });
-        recipesButton.setOnMouseEntered(escapeMenuRootCont -> bgView.setState("fade"));
-        recipesButton.setOnMouseExited(escapeMenuRootCont -> bgView.setState("idle"));
+        backButton.setOnMouseExited(e -> {
+            bgView.setState("idle");
+            backButton.setScaleX(1);
+            backButton.setScaleY(1);
+        });
+
+        Button recipesButton = setupControlButtonGraphics(mainFont, "Recipes",154,95,"/assets/ui/controlButtonHover/buttonBase_00033.png");
+        recipesButton.setOnAction(e -> {
+            RecipesPane recipesPane = new RecipesPane(root, isPaneOpen -> isRecipeBookOpen = isPaneOpen);
+            isRecipeBookOpen = true;
+        });
+        recipesButton.setOnMouseEntered(escapeMenuRootCont -> {
+            bgView.setState("fade");
+            recipesButton.setScaleX(1.1);
+            recipesButton.setScaleY(1.1);
+        });
+        recipesButton.setOnMouseExited(e -> {
+            bgView.setState("idle");
+            recipesButton.setScaleX(1);
+            recipesButton.setScaleY(1);
+        });
 
         //button pane
-        Pane buttonPane = new Pane();
-        buttonPane.setPrefSize(WIDTH, HEIGHT);
+        GridPane buttonPane = new GridPane();
+        buttonPane.setPrefSize(200, 200);
+        buttonPane.setAlignment(Pos.CENTER);
 
-        buttonPane.getChildren().addAll(closeButton, backButton, recipesButton);
+        buttonPane.add(backButton, 0, 1);
+        buttonPane.add(recipesButton, 0, 0);
+        buttonPane.setVgap(40);
 
 
-        closeButton.setLayoutX((double) ESC_WIDTH - 30);
-        closeButton.setLayoutY(10);
-
-        recipesButton.setLayoutX((double) ESC_WIDTH /2);
-        recipesButton.setLayoutY((double) ESC_HEIGHT/2 -20);
-
-        backButton.setLayoutX((double) ESC_WIDTH /2);
-        backButton.setLayoutY((double) ESC_HEIGHT/2 +20);
 
 
         escapeParentRoot.getChildren().addAll(bgView, buttonPane);
@@ -130,7 +138,7 @@ public class MixScene extends BaseScene{
         escapeMenuRootCont.getChildren().addAll(multiplyOverlay,escapeParentRoot);
 
         scene.setOnKeyPressed(event -> {
-            if(event.getCode() == KeyCode.ESCAPE) {
+            if(event.getCode() == KeyCode.ESCAPE && !isRecipeBookOpen) {
                 if(isEscUp) {
                     root.getChildren().remove(escapeMenuRootCont);
                     isEscUp = false;
@@ -259,13 +267,14 @@ public class MixScene extends BaseScene{
         }
     }
 
-    private Button setupControlButtonGraphics(Font font, String labelText){
+    public static Button setupControlButtonGraphics(Font font, String labelText, int width, int height, String sourcePath){
         //make the four control buttons
         Button controlButton = new Button();
 
-        Sprite controlButtonSprite = new Sprite(154,95);
-        controlButtonSprite.addState("idle", "/assets/ui/controlButtonHover/buttonBase_00033.png");
-        controlButtonSprite.addStateAnimation("hover", "/assets/ui/controlButtonHover/");
+        Sprite controlButtonSprite = new Sprite(width,height);
+        controlButtonSprite.addState("idle", sourcePath);
+        String basePath = sourcePath.substring(0, sourcePath.lastIndexOf('/')) + "/";
+        controlButtonSprite.addStateAnimation("hover", basePath);
 
         controlButtonSprite.setState("idle");
 
@@ -356,11 +365,11 @@ public class MixScene extends BaseScene{
 
             statePanelRatingAnimation();
 
-            currentMix.reset();
+            stageReset();
         }
     }
     private void setupActionButtons(GridPane actionButtonGrid){
-        Button resetMixButton = setupControlButtonGraphics(mainFont, "Reset");
+        Button resetMixButton = setupControlButtonGraphics(mainFont, "Reset",154,95,"/assets/ui/controlButtonHover/buttonBase_00033.png");
         resetMixButton.setOnAction(e -> {
             if(currentStage != SERVE) {
                 stageReset();
@@ -369,7 +378,7 @@ public class MixScene extends BaseScene{
 
 
         currentMix = new Mix();
-        Button pourButton = setupControlButtonGraphics(mainFont, "Pour");
+        Button pourButton = setupControlButtonGraphics(mainFont, "Pour",154,95,"/assets/ui/controlButtonHover/buttonBase_00033.png");
         new PourButtonLogic(pourButton, bartender, cup,
                 () -> {
                     if (availableLiquids.get(selectedIndex).getType().equals("SPIRIT")) {
@@ -401,7 +410,7 @@ public class MixScene extends BaseScene{
                     bartender.setState("choosing");
                 });
 
-        Button shakeButton = setupControlButtonGraphics(mainFont, "Shake");
+        Button shakeButton = setupControlButtonGraphics(mainFont, "Shake",154,95,"/assets/ui/controlButtonHover/buttonBase_00033.png");
         shakeButton.setOnAction(e -> {
             if(currentStage != SERVE && currentMix.getCurrentVolume() > 0){
                 currentStage = SHAKE;
@@ -411,7 +420,7 @@ public class MixScene extends BaseScene{
             }
         });
 
-        Button serveButton = setupControlButtonGraphics(mainFont, "Serve");
+        Button serveButton = setupControlButtonGraphics(mainFont, "Serve",154,95,"/assets/ui/controlButtonHover/buttonBase_00033.png");
         serveButton.setOnAction(e -> {
             cup.updateFill(0);
             cup.setColor(Color.WHITE);

@@ -62,9 +62,11 @@ public class Sprite extends ImageView {
     }
 
     public void setState(String name, boolean cascade) {
-        if (!cascade && currentAnimator != null) {
+        if (!cascade && currentAnimator != null && frames.get(currentFrameKey).size() > 1){
             currentAnimator.stop();
         }
+
+        currentFrameKey = name;
 
         List<Image> frameList = frames.get(name);
         if (frameList == null || frameList.isEmpty()) return;
@@ -112,5 +114,14 @@ public class Sprite extends ImageView {
             currentAnimator = newAnim;
             currentAnimator.play();
         }
+    }
+
+    public boolean isPlaying(){
+        return currentAnimator != null;
+    }
+
+    public double getAnimationDuration(String state) {
+        List<Image> list = frames.get(state);
+        return list != null ? list.size() * 16.0 : 0;
     }
 }

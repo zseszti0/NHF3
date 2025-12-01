@@ -44,7 +44,7 @@ public class MainMenuScene extends BaseScene{
 
         Button recipesButton = new Button("Recipes");
         recipesButton.setOnAction(e -> {
-            RecipesPane recipesPane = new RecipesPane(root);
+            RecipesPane recipesPane = new RecipesPane(root, isPaneOpen -> {});
         });
 
         Button exitButton = new Button("Exit");

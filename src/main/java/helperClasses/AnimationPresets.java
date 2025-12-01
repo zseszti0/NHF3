@@ -1,9 +1,11 @@
 package helperClasses;
 
 import graphics.Animator;
+import graphics.Sprite;
 import javafx.animation.KeyValue;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
+import javafx.scene.layout.StackPane;
 import javafx.util.Duration;
 
 public class AnimationPresets {
@@ -106,7 +108,20 @@ public class AnimationPresets {
                 new KeyValue(target.scaleXProperty(), target.getScaleX()*1.3),
                 new KeyValue(target.scaleYProperty(), target.getScaleY()*1.3)
         );
+        anim.addKeyFrame((Duration.millis(2000+500)),
+                new KeyValue(target.textProperty(),finalRatingText)
+        );
 
         return anim;
+    }
+
+    public static Animator FadeIn(Node target){
+        Animator anim = new Animator(target);
+
+
+        anim.addKeyFrame(Duration.millis(0), new KeyValue(target.opacityProperty(), 0));
+        anim.addKeyFrame(Duration.millis(500), new KeyValue(target.opacityProperty(), 1));
+
+        return  anim;
     }
 }

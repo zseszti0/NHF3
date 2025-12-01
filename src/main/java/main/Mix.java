@@ -104,6 +104,9 @@ public class Mix implements Serializable {
             gAcc += liquidColor.getGreen() * weight;
             bAcc += liquidColor.getBlue() * weight;
         }
+        rAcc = Math.min(rAcc, 1.0);
+        gAcc = Math.min(gAcc, 1.0);
+        bAcc = Math.min(bAcc, 1.0);
 
         return new Color(rAcc, gAcc, bAcc, 1.0);
     }

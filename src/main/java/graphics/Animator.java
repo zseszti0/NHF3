@@ -25,9 +25,9 @@ public class Animator {
 
     }
 
-    private static List<WritableValue<?>> getProps(List<KeyFrame> fr){
+    private  List<WritableValue<?>> getProps(){
         List<WritableValue<?>> props = new ArrayList<>();
-        for(KeyFrame kf : fr){
+        for(KeyFrame kf : frames){
             for(KeyValue kv : kf.getValues()){
                 props.add(kv.getTarget());
             }
@@ -55,7 +55,7 @@ public class Animator {
 
         frames.addAll(timeAdjustedNewFrames);
 
-        List<WritableValue<?>> allProps = getProps(frames);
+        List<WritableValue<?>> allProps = getProps();
 
         AnimationLockRegistry.lockProperties(target,allProps);
 
@@ -77,7 +77,7 @@ public class Animator {
 
     public void play() {
         // Collect all properties that this animation wants to modify
-        List<WritableValue<?>> props = getProps(frames);
+        List<WritableValue<?>> props = getProps();
 
         // BLOCK THIS ANIMATION if ANY property is already locked
         if (AnimationLockRegistry.anyPropertyLocked(target, props)) {
@@ -104,7 +104,7 @@ public class Animator {
             timeline.stop();
 
             // Collect all properties that this animation modified to unlock them manually
-            List<WritableValue<?>> props = getProps(frames);
+            List<WritableValue<?>> props = getProps();
 
             AnimationLockRegistry.unlockProperties(target, props);
         }
