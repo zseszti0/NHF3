@@ -282,7 +282,7 @@ public class RecipesPane {
         
         //bg
         Sprite bgView = new Sprite(1020,1034);
-        bgView.addState("idle","/assets/ui/recipeBookClose/Book_00029.png");
+        bgView.addState("idle","/assets/ui/recipeBookClose/Book_00024.png");
         bgView.addStateAnimation("open", "/assets/ui/recipeBookOpen/");
         bgView.addStateAnimation("close", "/assets/ui/recipeBookClose/");
 

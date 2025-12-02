@@ -46,15 +46,15 @@ public class MainMenuScene extends BaseScene{
         buttonCont.setPrefWidth(200);
 
         //init the buttons
-        Button startButton = MixScene.setupControlButtonGraphics(mainFont, "Mix!",154,95,"/assets/ui/controlButtonHover/buttonBase_00033.png");
+        Button startButton = MixScene.setupControlButtonGraphics(mainFont, "Mix!",154,95,"/assets/ui/controlButtonHover/buttonBase_00027.png");
         startButton.setOnAction(e -> SceneManager.loadScene("mix")); //temporary action
 
-        Button recipesButton = MixScene.setupControlButtonGraphics(mainFont, "Recipes",154,95,"/assets/ui/controlButtonHover/buttonBase_00033.png");
+        Button recipesButton = MixScene.setupControlButtonGraphics(mainFont, "Recipes",154,95,"/assets/ui/controlButtonHover/buttonBase_00027.png");
         recipesButton.setOnAction(e -> {
             RecipesPane recipesPane = new RecipesPane(root, isPaneOpen -> {});
         });
 
-        Button exitButton = MixScene.setupControlButtonGraphics(mainFont, "Exit",154,95,"/assets/ui/controlButtonHover/buttonBase_00033.png");
+        Button exitButton = MixScene.setupControlButtonGraphics(mainFont, "Exit",154,95,"/assets/ui/controlButtonHover/buttonBase_00027.png");
         exitButton.setOnAction(e -> System.exit(0));
 
         buttonCont.getChildren().addAll(startButton, recipesButton, exitButton);

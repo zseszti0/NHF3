@@ -83,7 +83,7 @@ public class MixScene extends BaseScene{
 
 
         //add the back and recepies buttons
-        Button backButton = setupControlButtonGraphics(mainFont, "Back",154,95,"/assets/ui/controlButtonHover/buttonBase_00033.png");
+        Button backButton = setupControlButtonGraphics(mainFont, "Back",154,95,"/assets/ui/controlButtonHover/buttonBase_00027.png");
         backButton.setOnAction(e -> {
             root.getChildren().remove(escapeMenuRootCont);
             SceneManager.loadScene("main menu");
@@ -100,7 +100,7 @@ public class MixScene extends BaseScene{
             backButton.setScaleY(1);
         });
 
-        Button recipesButton = setupControlButtonGraphics(mainFont, "Recipes",154,95,"/assets/ui/controlButtonHover/buttonBase_00033.png");
+        Button recipesButton = setupControlButtonGraphics(mainFont, "Recipes",154,95,"/assets/ui/controlButtonHover/buttonBase_00027.png");
         recipesButton.setOnAction(e -> {
             RecipesPane recipesPane = new RecipesPane(root, isPaneOpen -> isRecipeBookOpen = isPaneOpen);
             isRecipeBookOpen = true;
@@ -179,7 +179,7 @@ public class MixScene extends BaseScene{
                 String imagePath = getClass().getResource("/assets/character_sprite/" + file.getName()).toExternalForm();
                 bartender.addState(stateName, imagePath);
             }
-            else{
+            else if (file.isDirectory()) {
                 String stateName = file.getName();
                 String imagePath = "/assets/character_sprite/" + file.getName() + "/";
                 bartender.addStateAnimation(stateName, imagePath);
@@ -349,18 +349,22 @@ public class MixScene extends BaseScene{
     }
     private void fullRatingAnimation(String reaction){
         bartender.setState("tasting");
-        double animDuration = bartender.getAnimationDuration("tasting");
 
+        double animDuration = bartender.getAnimationDuration("tasting");
         Timeline timeline = new Timeline(
-                new KeyFrame(Duration.millis(animDuration), ae -> {
+                new KeyFrame(Duration.millis(2000), ae -> {
                     statePanelRatingAnimation();
+                }),
+                new KeyFrame(Duration.millis(animDuration), ae -> {
                     bartender.setState(reaction);
                 }),
-                new KeyFrame(Duration.millis(animDuration+5000), ae -> {
+                new KeyFrame(Duration.millis(animDuration+3000), ae -> {
                     stageReset();
                 })
         );
         timeline.play();
+
+
     }
     private void rate(){
         if(currentStage == SHAKE){
@@ -390,7 +394,7 @@ public class MixScene extends BaseScene{
         }
     }
     private void setupActionButtons(GridPane actionButtonGrid){
-        Button resetMixButton = setupControlButtonGraphics(mainFont, "Reset",154,95,"/assets/ui/controlButtonHover/buttonBase_00033.png");
+        Button resetMixButton = setupControlButtonGraphics(mainFont, "Reset",154,95,"/assets/ui/controlButtonHover/buttonBase_00027.png");
         resetMixButton.setOnAction(e -> {
             if(currentStage != SERVE) {
                 stageReset();
@@ -399,7 +403,7 @@ public class MixScene extends BaseScene{
 
 
         currentMix = new Mix();
-        Button pourButton = setupControlButtonGraphics(mainFont, "Pour",154,95,"/assets/ui/controlButtonHover/buttonBase_00033.png");
+        Button pourButton = setupControlButtonGraphics(mainFont, "Pour",154,95,"/assets/ui/controlButtonHover/buttonBase_00027.png");
         new PourButtonLogic(pourButton, bartender, cup,
                 () -> {
                     if (availableLiquids.get(selectedIndex).getType().equals("SPIRIT")) {
@@ -431,7 +435,7 @@ public class MixScene extends BaseScene{
                     bartender.setState("choosing");
                 });
 
-        Button shakeButton = setupControlButtonGraphics(mainFont, "Shake",154,95,"/assets/ui/controlButtonHover/buttonBase_00033.png");
+        Button shakeButton = setupControlButtonGraphics(mainFont, "Shake",154,95,"/assets/ui/controlButtonHover/buttonBase_00027.png");
         shakeButton.setOnAction(e -> {
             if(currentStage != SERVE && currentMix.getCurrentVolume() > 0){
                 currentStage = SHAKE;
@@ -441,7 +445,7 @@ public class MixScene extends BaseScene{
             }
         });
 
-        Button serveButton = setupControlButtonGraphics(mainFont, "Serve",154,95,"/assets/ui/controlButtonHover/buttonBase_00033.png");
+        Button serveButton = setupControlButtonGraphics(mainFont, "Serve",154,95,"/assets/ui/controlButtonHover/buttonBase_00027.png");
         serveButton.setOnAction(e -> {
             cup.updateFill(0);
             cup.setColor(Color.WHITE);
@@ -475,7 +479,7 @@ public class MixScene extends BaseScene{
         StackPane statePanelPane = new StackPane();
 
         Sprite statePanel = new Sprite(283,196);
-        statePanel.addState("idle", "/assets/ui/statePanelAnim/statePanel_00059.png");
+        statePanel.addState("idle", "/assets/ui/statePanelAnim/statePanel_00000.png");
         statePanel.setState("idle");
 
         statePanel.addStateAnimation("anime", "/assets/ui/statePanelAnim/");

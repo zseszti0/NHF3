@@ -30,7 +30,8 @@ public class Sprite extends ImageView {
 
     public void addState(String name, String imagePath) {
         List<Image> newStateImage = new ArrayList<>();
-        newStateImage.add(new Image(imagePath));
+        // OPTIMIZATION 1: Resize image to sprite dimensions on load to save RAM
+        newStateImage.add(new Image(imagePath, WIDTH, HEIGHT, true, true));
         frames.put(name, newStateImage);
     }
 
@@ -48,10 +49,18 @@ public class Sprite extends ImageView {
             return;
         }
 
-        for (File file : Objects.requireNonNull(folder.listFiles())) {
-            if (file.getName().toLowerCase().endsWith(".png")) {
-                String imagePath = getClass().getResource(folderPath + file.getName()).toExternalForm();
-                newStateAnim.add(new Image(imagePath));
+        File[] files = folder.listFiles();
+        if (files != null) {
+            // OPTIMIZATION 2: Sort files to ensure animation plays in order (001, 002...)
+            Arrays.sort(files);
+
+            for (File file : files) {
+                if (file.getName().toLowerCase().endsWith(".png")) {
+                    String imagePath = getClass().getResource(folderPath + file.getName()).toExternalForm();
+                    // OPTIMIZATION 1: Resize image to sprite dimensions on load
+                    // This makes 240+ frames fit easily into memory
+                    newStateAnim.add(new Image(imagePath, WIDTH, HEIGHT, true, true));
+                }
             }
         }
         frames.put(name, newStateAnim);
@@ -62,7 +71,7 @@ public class Sprite extends ImageView {
     }
 
     public void setState(String name, boolean cascade) {
-        if (!cascade && currentAnimator != null && frames.get(currentFrameKey).size() > 1){
+        if (!cascade && currentAnimator != null && frames.containsKey(currentFrameKey) && frames.get(currentFrameKey).size() > 1){
             currentAnimator.stop();
         }
 
@@ -98,8 +107,10 @@ public class Sprite extends ImageView {
         if (animFrames == null || animFrames.isEmpty()) return;
 
         Animator newAnim = new Animator(this);
-        // Default to approx 24 FPS (41ms)
-        double frameDuration = 16.0;
+        
+        // OPTIMIZATION 3: Adjusted to ~24 FPS (1000ms / 24 ≈ 41.6ms)
+        // If you use 60 FPS assets with this setting, they will play in slow motion.
+        double frameDuration = 41.6;
 
         for (int i = 0; i < animFrames.size(); i++) {
             newAnim.addKeyFrame(Duration.millis(i * frameDuration),
@@ -122,6 +133,7 @@ public class Sprite extends ImageView {
 
     public double getAnimationDuration(String state) {
         List<Image> list = frames.get(state);
-        return list != null ? list.size() * 16.0 : 0;
+        // Updated calculation to match the new 24 FPS rate
+        return list != null ? list.size() * 41.6 : 0;
     }
 }
