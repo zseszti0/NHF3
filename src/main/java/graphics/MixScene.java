@@ -1,6 +1,8 @@
 package graphics;
 
 import helperClasses.*;
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.geometry.Insets;
@@ -15,6 +17,7 @@ import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
+import javafx.util.Duration;
 import main.Liquid;
 import main.Mix;
 import main.Recipe;
@@ -175,6 +178,11 @@ public class MixScene extends BaseScene{
                 String stateName = file.getName().substring(0, file.getName().lastIndexOf('.'));
                 String imagePath = getClass().getResource("/assets/character_sprite/" + file.getName()).toExternalForm();
                 bartender.addState(stateName, imagePath);
+            }
+            else{
+                String stateName = file.getName();
+                String imagePath = "/assets/character_sprite/" + file.getName() + "/";
+                bartender.addStateAnimation(stateName, imagePath);
             }
         }
 
@@ -339,6 +347,21 @@ public class MixScene extends BaseScene{
         thinkingText.cascadeAnimation(ratingText);
 
     }
+    private void fullRatingAnimation(String reaction){
+        bartender.setState("tasting");
+        double animDuration = bartender.getAnimationDuration("tasting");
+
+        Timeline timeline = new Timeline(
+                new KeyFrame(Duration.millis(animDuration), ae -> {
+                    statePanelRatingAnimation();
+                    bartender.setState(reaction);
+                }),
+                new KeyFrame(Duration.millis(animDuration+5000), ae -> {
+                    stageReset();
+                })
+        );
+        timeline.play();
+    }
     private void rate(){
         if(currentStage == SHAKE){
             currentStage = SERVE;
@@ -363,9 +386,7 @@ public class MixScene extends BaseScene{
 
             }
 
-            statePanelRatingAnimation();
-
-            stageReset();
+            fullRatingAnimation(newRecipe.reaction);
         }
     }
     private void setupActionButtons(GridPane actionButtonGrid){
