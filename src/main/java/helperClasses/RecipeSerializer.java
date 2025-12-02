@@ -45,4 +45,10 @@ public class RecipeSerializer {
         out.writeObject(savedRecipees);
         out.close();
     }
+    public static void updateRecipeFile(List<Recipe> recipes, String filePath) throws IOException {
+        // rewrite the whole ile
+        ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(filePath));
+        out.writeObject(recipes);
+        out.close();
+    }
 }
